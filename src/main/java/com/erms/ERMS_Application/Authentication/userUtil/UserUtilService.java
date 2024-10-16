@@ -12,10 +12,12 @@ import com.erms.ERMS_Application.Authentication.sales.Sales;
 import com.erms.ERMS_Application.Authentication.sales.SalesRepository;
 import com.erms.ERMS_Application.Authentication.technician.Technician;
 import com.erms.ERMS_Application.Authentication.technician.TechnicianRepository;
+import com.erms.ERMS_Application.Authentication.telecaller.TelecallerRepository;
 import com.erms.ERMS_Application.Authentication.user.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 
 import org.springframework.mail.javamail.JavaMailSender;
@@ -43,7 +45,12 @@ public class UserUtilService {
     @Autowired
     private SalesRepository salesRepository;
     @Autowired
+    private TelecallerRepository telecallerRepository;
+
+    @Autowired
     private OrganizationRepository organizationRepository;
+
+
 
     @Autowired
     private JavaMailSender mailSender;
@@ -195,6 +202,10 @@ public class UserUtilService {
                 prefix = "SALES";
                 lastRoleIdList = salesRepository.findUserRoleIdByRole(pageable);
                 break;
+            case TELECALLER:
+                prefix = "TEL";
+                lastRoleIdList =  telecallerRepository.findUserRoleIdByRole(pageable);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown role: " + role);
         }
@@ -219,9 +230,9 @@ public class UserUtilService {
 
 
 
-    // reset password
+    // forgot password
 
-    public  String resetPassword(String email ){
+    public  String forgotPassword(String email ){
 
         String newRandomGenPassword = generateRandomPassword();
 
@@ -290,15 +301,27 @@ public class UserUtilService {
 
     // send email
 
-    public void sendEmail(String email , String newRandomGenPassword){
+    public void sendEmail(String email, String newRandomGenPassword) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Account Registration - Your New Password");
+            message.setText("Dear user,\n\nYour account has been successfully registered. "
+                    + "Please use the following password to log in to your account:\n\n"
+                    + newRandomGenPassword
+                    + "\n\nFor security reasons, we recommend changing your password immediately after logging in."
+                    + "\n\nBest regards,\nYour Company Team");
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Password Reset Request");
-        message.setText("Your new password is: " + newRandomGenPassword);
-        mailSender.send(message);
+            // Send the email
+            mailSender.send(message);
 
+        } catch (MailException e) {
+            // Handle mail-sending exceptions, log the error, or retry if necessary
+            System.out.println("Failed to send email to " + email + ": " + e.getMessage());
+            throw new IllegalStateException("Unable to send email at this time. Please try again later.");
+        }
     }
+
 
 
 

@@ -12,6 +12,8 @@ import com.erms.ERMS_Application.Authentication.sales.Sales;
 import com.erms.ERMS_Application.Authentication.sales.SalesRepository;
 import com.erms.ERMS_Application.Authentication.technician.Technician;
 import com.erms.ERMS_Application.Authentication.technician.TechnicianRepository;
+import com.erms.ERMS_Application.Authentication.telecaller.Telecaller;
+import com.erms.ERMS_Application.Authentication.telecaller.TelecallerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +32,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final SaleManagerRepository saleManagerRepository;
     private final TechnicianRepository technicianRepository;
     private final SalesRepository salesRepository;
+    @Autowired
+    private TelecallerRepository telecallerRepository;
 
     @Autowired
     public CustomUserDetailsService(OrganizationRepository organizationRepository, AdminRepository adminRepository,
@@ -77,6 +81,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<Sales> salesOpt = salesRepository.findByEmail(email);
         if (salesOpt.isPresent()) {
             return new CustomUserDetails(salesOpt.get());
+        }
+
+        Optional<Telecaller> telecallerOpt = telecallerRepository.findByEmail(email);
+        if (telecallerOpt.isPresent()) {
+            return new CustomUserDetails(telecallerOpt.get());
         }
 
         throw new UsernameNotFoundException("User not found with email: " + email);

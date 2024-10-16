@@ -1,9 +1,24 @@
 package com.erms.ERMS_Application.Authentication.sales;
 
 
+import java.util.List;
+
 import com.erms.ERMS_Application.Authentication.saleManager.SaleManager;
 import com.erms.ERMS_Application.Authentication.user.Role;
-import jakarta.persistence.*;
+import com.erms.ERMS_Application.Quotation.AddParty.AddPartyEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "sales")
@@ -12,20 +27,10 @@ public class Sales {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    private String firstname;
-//    private String lastname;
-//    private String password;
-
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private long mobileNumber;
-
-//    private String manager;
-//    private String reportingManager;
-//    private String officialMailId;
 
     @Enumerated(EnumType.STRING)
     private Role role;  // SALES, other roles if applicable
@@ -36,6 +41,11 @@ public class Sales {
     @ManyToOne(fetch = FetchType.LAZY)  // Lazy fetch to improve performance
     @JoinColumn(name = "salesManager_id", nullable = false)  // Foreign key constraint
     private SaleManager saleManager;
+    
+    @OneToMany(mappedBy = "sales")
+    private List<AddPartyEntity> addParty;
+    
+   
 
     // Getters and Setters
     public Long getId() {
@@ -70,20 +80,6 @@ public class Sales {
         this.lastName = lastName;
     }
 
-
-    public long getMobileNumber() {
-        return mobileNumber;
-    }
-
-    public void setMobileNumber(long mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-
-
-
-
-
     public String getPassword() {
         return password;
     }
@@ -116,4 +112,24 @@ public class Sales {
     public void setSaleManager(SaleManager saleManager) {
         this.saleManager = saleManager;
     }
+
+	public Sales(Long id, String firstName, String lastName, String email, String password, Role role, String salesId,
+			SaleManager saleManager, List<AddPartyEntity> addParty) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.password = password;
+		this.role = role;
+		this.salesId = salesId;
+		this.saleManager = saleManager;
+		this.addParty = addParty;
+	}
+
+	public Sales() {
+		super();
+	}
+    
+    
 }

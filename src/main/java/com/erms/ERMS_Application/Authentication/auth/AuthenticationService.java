@@ -15,6 +15,8 @@ import com.erms.ERMS_Application.Authentication.security.CustomUserDetails;
 import com.erms.ERMS_Application.Authentication.security.CustomUserDetailsService;
 import com.erms.ERMS_Application.Authentication.technician.Technician;
 import com.erms.ERMS_Application.Authentication.technician.TechnicianRepository;
+import com.erms.ERMS_Application.Authentication.telecaller.Telecaller;
+import com.erms.ERMS_Application.Authentication.telecaller.TelecallerRepository;
 import com.erms.ERMS_Application.Authentication.token.Token;
 import com.erms.ERMS_Application.Authentication.token.TokenRepository;
 import com.erms.ERMS_Application.Authentication.token.TokenType;
@@ -46,6 +48,8 @@ public class AuthenticationService {
     private final SaleManagerRepository saleManagerRepository;
     private final TechnicianRepository technicianRepository;
     private final SalesRepository salesRepository;
+    @Autowired
+    private TelecallerRepository telecallerRepository;
     private final TokenRepository tokenRepository;
     private final OrganizationRepository organizationRepository; // Add this
     private final PasswordEncoder passwordEncoder;
@@ -81,7 +85,7 @@ public class AuthenticationService {
     /////////////////////  Register Method  //////////////////////////
 
 
-    public AuthenticationResponse registerAdmin(String organizationId, String firstname, String lastname, String email, Role role,String password) {
+    public AuthenticationResponse registerAdmin(String organizationId, String firstname, String lastname, String email, Role role) {
         // Find the organization by organization ID
         Organization organization = organizationRepository.findByOrganizationId(organizationId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid organization ID"));
@@ -101,11 +105,14 @@ public class AuthenticationService {
         admin.setLastname(lastname);
         admin.setEmail(email);
         admin.setRole(role);
-        //            String pass=userUtilService.generateRandomPassword();
-        admin.setPassword(passwordEncoder.encode(password));
-        admin.setAdminId(userUtilService.generateUserRoleId(role));
 
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+        admin.setPassword(encodedPassword);
+        admin.setAdminId(userUtilService.generateUserRoleId(role));
         adminRepository.save(admin);
+
+        userUtilService.sendEmail(admin.getEmail(),newRandomGenPassword);
 
         // Generate JWT response
         return generateJwtResponse(admin);
@@ -114,7 +121,7 @@ public class AuthenticationService {
 
 
 
-    public AuthenticationResponse registerManager(String adminId, String firstname, String lastname, String email, Role role, String password) {
+    public AuthenticationResponse registerManager(String adminId, String firstname, String lastname, String email, Role role) {
         // Verify the admin based on the provided adminId
         Admin admin = adminRepository.findByAdminId(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid admin ID"));
@@ -137,18 +144,22 @@ public class AuthenticationService {
         manager.setLastname(lastname);
         manager.setEmail(email);
         manager.setRole(role);
-        //            String pass=userUtilService.generateRandomPassword();
-        manager.setPassword(passwordEncoder.encode(password));
+
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+
+        manager.setPassword(encodedPassword);
         manager.setManagersId(userUtilService.generateUserRoleId(role));
 
         managerRepository.save(manager);
+        userUtilService.sendEmail(manager.getEmail(),newRandomGenPassword);
 
         // Generate and return JWT token for the manager
         return generateJwtResponse(manager);
     }
 
 
-    public AuthenticationResponse registerSaleManager(String managersId, String firstname, String lastname, String email, Role role, String password) {
+    public AuthenticationResponse registerSaleManager(String managersId, String firstname, String lastname, String email, Role role) {
         // Verify the manager by managersId from the request
         Managers manager = managerRepository.findByManagersId(managersId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid manager ID"));
@@ -174,10 +185,15 @@ public class AuthenticationService {
         saleManager.setLastname(lastname);
         saleManager.setEmail(email);
         saleManager.setRole(role);
-//              String pass=userUtilService.generateRandomPassword();
-        saleManager.setPassword(passwordEncoder.encode(password));
+
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+
+        saleManager.setPassword(encodedPassword);
         saleManager.setSalesManagerId(userUtilService.generateUserRoleId(role));
         saleManagerRepository.save(saleManager);
+
+        userUtilService.sendEmail(saleManager.getEmail(),newRandomGenPassword);
 
         // Generate and return JWT token for the sale manager
         return generateJwtResponse(saleManager);
@@ -186,7 +202,110 @@ public class AuthenticationService {
 
 
 
-    public AuthenticationResponse registerTechnician(String salesManagerId, String firstname, String lastname, String email, Role role, String password) {
+    public AuthenticationResponse registerTechnician(String salesManagerId, String firstname, String lastname, String email, Role role) {
+        // Verify the sale manager based on the provided saleManagerId
+        SaleManager saleManager = saleManagerRepository.findBySalesManagerId(salesManagerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sale manager ID"));
+
+        // Check if the email is already in use
+        if(organizationRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email is already use in organization");
+        }
+        else if (adminRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in admin");
+        }
+        else if (managerRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already  use in manager");
+        }
+        else if (saleManagerRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in saleManager");
+        }
+        else if (salesRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in sales");
+        }
+        else if( telecallerRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email is already use telecaller");
+        }
+        else if (technicianRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use technician");
+        }
+
+        // Create and populate the technician entity
+        Technician technician = new Technician();
+        technician.setSaleManager(saleManager); // Associate the technician with the respective sale manager
+        technician.setFirstname(firstname);
+        technician.setLastname(lastname);
+        technician.setEmail(email);
+        technician.setRole(role);
+
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+
+        technician.setPassword(encodedPassword);
+        technician.setTechnicianId(userUtilService.generateUserRoleId(role));
+        technicianRepository.save(technician);
+
+        userUtilService.sendEmail(technician.getEmail(),newRandomGenPassword);
+
+        // Generate and return JWT token for the technician
+        return generateJwtResponse(technician);
+    }
+
+
+
+    public AuthenticationResponse registerSales(String salesManagerId, String firstname, String lastname, String email, Role role) {
+        // Verify the sale manager based on the provided saleManagerId
+        SaleManager saleManager = saleManagerRepository.findBySalesManagerId(salesManagerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sale manager ID"));
+
+        // Check if the email is already in use
+        if(organizationRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email is already use in organization");
+        }
+        else if (adminRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in admin");
+        }
+        else if (managerRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already  use in manager");
+        }
+        else if (saleManagerRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in saleManager");
+        }
+        else if (technicianRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in technician ");
+        }
+        else if( telecallerRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email is already use telecaller");
+        }
+        else if (salesRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already use in sales");
+        }
+
+        // Create and populate the sales entity
+        Sales sales = new Sales();
+        sales.setSaleManager(saleManager); // Associate the sales with the respective sale manager
+        sales.setFirstName(firstname);
+        sales.setLastName(lastname);
+        sales.setEmail(email);
+        
+
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+
+        sales.setPassword(encodedPassword);
+        sales.setRole(role);
+        sales.setSalesId(userUtilService.generateUserRoleId(role));
+        salesRepository.save(sales);
+
+        userUtilService.sendEmail(sales.getEmail(),newRandomGenPassword);
+
+        // Generate and return JWT token for the sales
+        return generateJwtResponse(sales);
+
+    }
+
+
+    public AuthenticationResponse registerTelecaller(String salesManagerId, String firstname, String lastname, String email, Role role) {
         // Verify the sale manager based on the provided saleManagerId
         SaleManager saleManager = saleManagerRepository.findBySalesManagerId(salesManagerId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sale manager ID"));
@@ -210,66 +329,30 @@ public class AuthenticationService {
         else if (technicianRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email is already use technician");
         }
+        else if( telecallerRepository.existsByEmail(email)){
+            throw new IllegalArgumentException("Email is already use telecaller");
+        }
 
         // Create and populate the technician entity
-        Technician technician = new Technician();
-        technician.setSaleManager(saleManager); // Associate the technician with the respective sale manager
-        technician.setFirstname(firstname);
-        technician.setLastname(lastname);
-        technician.setEmail(email);
-        technician.setRole(role);
-//            String pass=userUtilService.generateRandomPassword();
+        Telecaller telecaller = new Telecaller();
+        telecaller.setSaleManager(saleManager); // Associate the telecaller with the respective sale manager
+        telecaller.setFirstname(firstname);
+        telecaller.setLastname(lastname);
+        telecaller.setEmail(email);
+        telecaller.setRole(role);
 
-        technician.setPassword(passwordEncoder.encode(password));
-        technician.setTechnicianId(userUtilService.generateUserRoleId(role));
-        technicianRepository.save(technician);
+
+        String newRandomGenPassword = userUtilService.generateRandomPassword();
+        String encodedPassword = passwordEncoder.encode(newRandomGenPassword);
+
+        telecaller.setPassword(encodedPassword);
+        telecaller.setTelecallerId(userUtilService.generateUserRoleId(role));
+        telecallerRepository.save(telecaller);
+
+        userUtilService.sendEmail(telecaller.getEmail(),newRandomGenPassword);
 
         // Generate and return JWT token for the technician
-        return generateJwtResponse(technician);
-    }
-
-
-
-    public AuthenticationResponse registerSales(String salesManagerId, String firstname, String lastname, String email, Role role, String password) {
-        // Verify the sale manager based on the provided saleManagerId
-        SaleManager saleManager = saleManagerRepository.findBySalesManagerId(salesManagerId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid sale manager ID"));
-
-        // Check if the email is already in use
-        if(organizationRepository.existsByEmail(email)){
-            throw new IllegalArgumentException("Email is already use in organization");
-        }
-        else if (adminRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email is already use in admin");
-        }
-        else if (managerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email is already  use in manager");
-        }
-        else if (saleManagerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email is already use in saleManager");
-        }
-        else if (technicianRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email is already use in technician ");
-        }
-        if (salesRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email is already use in sales");
-        }
-
-        // Create and populate the sales entity
-        Sales sales = new Sales();
-        sales.setSaleManager(saleManager); // Associate the sales with the respective sale manager
-        sales.setFirstName(firstname);
-        sales.setLastName(lastname);
-        sales.setEmail(email);
-//            String pass=userUtilService.generateRandomPassword();
-        sales.setPassword(passwordEncoder.encode(password));
-        sales.setRole(role);
-        sales.setSalesId(userUtilService.generateUserRoleId(role));
-        salesRepository.save(sales);
-
-        // Generate and return JWT token for the sales
-        return generateJwtResponse(sales);
-
+        return generateJwtResponse(telecaller);
     }
 
 
@@ -333,12 +416,24 @@ public class AuthenticationService {
             extraClaims.put("firstname", sales.getFirstName());
             extraClaims.put("lastname", sales.getLastName());
             extraClaims.put("role", sales.getRole().name());
-            extraClaims.put("mobileNumber", sales.getMobileNumber());
+//            extraClaims.put("mobileNumber", sales.getMobileNumber());
 //            extraClaims.put("reportingManager", sales.getReportingManager());
 //            extraClaims.put("officialMailId", sales.getOfficialMailId());
             extraClaims.put("saleManagerId",sales.getSaleManager().getSalesManagerId());
             extraClaims.put("salesId", sales.getSalesId());
-        } else {
+        }
+        else if (user instanceof Telecaller) {
+            Telecaller telecaller = (Telecaller) user;
+            userDetails = new CustomUserDetails(telecaller);
+
+            // Add claims specific to Technician
+            extraClaims.put("firstname", telecaller.getFirstname());
+            extraClaims.put("lastname", telecaller.getLastname());
+            extraClaims.put("role", telecaller.getRole().name());
+            extraClaims.put("saleManagerId",telecaller.getSaleManager().getSalesManagerId());
+            extraClaims.put("telecallerId", telecaller.getTelecallerId());
+        }
+        else {
             throw new IllegalArgumentException("Invalid user type");
         }
 
@@ -407,7 +502,17 @@ public class AuthenticationService {
             extraClaims.put("role", sales.getRole().name());
             extraClaims.put("saleManagerId", sales.getSaleManager().getSalesManagerId());
             extraClaims.put("salesId", sales.getSalesId());
-        } else {
+        }
+        else if (user instanceof Telecaller) {
+            Telecaller telecaller = (Telecaller) user;
+            extraClaims.put("firstname", telecaller.getFirstname());
+            extraClaims.put("lastname", telecaller.getLastname());
+            extraClaims.put("role", telecaller.getRole().name());
+            extraClaims.put("saleManagerId", telecaller.getSaleManager().getSalesManagerId());
+            extraClaims.put("telecallerId", telecaller.getTelecallerId());
+        }
+
+        else {
             throw new IllegalArgumentException("Invalid user type");
         }
 
@@ -449,6 +554,9 @@ public class AuthenticationService {
 
         Optional<Sales> sales = salesRepository.findByEmail(email);
         if (sales.isPresent()) return sales.get();
+
+        Optional<Telecaller> telecaller = telecallerRepository.findByEmail(email);
+        if (telecaller.isPresent()) return telecaller.get();
 
         throw new IllegalArgumentException("User not found");
     }
@@ -536,7 +644,17 @@ public class AuthenticationService {
                     extraClaims.put("role", sales.getRole().name());
                     extraClaims.put("saleManagerId", sales.getSaleManager().getSalesManagerId());
                     extraClaims.put("salesId", sales.getSalesId());
-                } else {
+                }
+                else if (user instanceof Telecaller) {
+                    Telecaller telecaller = (Telecaller) user;
+                    extraClaims.put("firstname", telecaller.getFirstname());
+                    extraClaims.put("lastname", telecaller.getLastname());
+                    extraClaims.put("role", telecaller.getRole().name());
+                    extraClaims.put("saleManagerId", telecaller.getSaleManager().getSalesManagerId());
+                    extraClaims.put("telecallerId", telecaller.getTelecallerId());
+                }
+
+                else {
                     throw new IllegalArgumentException("Invalid user type");
                 }
 
@@ -577,6 +695,8 @@ public class AuthenticationService {
             return Math.toIntExact(technicianRepository.findByEmail(email).get().getId());
         } else if (salesRepository.findByEmail(email).isPresent()) {
             return Math.toIntExact(salesRepository.findByEmail(email).get().getId());
+        } else if (telecallerRepository.findByEmail(email).isPresent()){
+            return Math.toIntExact(telecallerRepository.findByEmail(email).get().getId());
         }
         throw new IllegalArgumentException("User not found");
     }

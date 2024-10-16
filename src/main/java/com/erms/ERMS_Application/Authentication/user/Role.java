@@ -56,6 +56,13 @@ public enum Role {
                     Permission.SALES_DELETE,
                     Permission.SALES_CREATE
             )
+    ), TELECALLER(
+            Set.of(
+                    Permission.TELECALLER_READ,
+                    Permission.TELECALLER_UPDATE,
+                    Permission.TELECALLER_DELETE,
+                    Permission.TELECALLER_CREATE
+            )
     );
 
 

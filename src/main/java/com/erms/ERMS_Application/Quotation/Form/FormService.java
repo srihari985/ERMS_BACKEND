@@ -1,18 +1,15 @@
 package com.erms.ERMS_Application.Quotation.Form;
 
-
-
-import com.erms.ERMS_Application.Quotation.AddParty.AddPartyEntity;
-import com.erms.ERMS_Application.Quotation.Salesman.SaleEntity;
-import com.erms.ERMS_Application.Quotation.Salesman.SaleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.erms.ERMS_Application.Authentication.sales.Sales;
+import com.erms.ERMS_Application.Authentication.sales.SalesRepository;
+import com.erms.ERMS_Application.Quotation.AddParty.AddPartyEntity;
 
 @Service
 public class FormService {
@@ -21,14 +18,14 @@ public class FormService {
 	private FormRepository formRepo;
 	
 	@Autowired
-	private SaleRepository saleRepo;
+	private SalesRepository saleRepo;
 	   
 	/////////////////////Saving Form /////////////////////////////////////////	
 
 	 public FormEntity createForm(AddPartyEntity addPartyOpt, FormEntity formEntity, long sId) {
 
 	        // Get SaleEntity for the salesman
-	        SaleEntity saleEntity = saleRepo.findById(sId)
+		 Sales saleEntity = saleRepo.findById(sId)
 	                                              .orElseThrow(() -> new RuntimeException("Salesman not found"));
 
 	        // Generate the quotation number

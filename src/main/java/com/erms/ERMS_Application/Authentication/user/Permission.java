@@ -30,7 +30,15 @@ public enum Permission {
     SALES_READ("sales:read"),
     SALES_UPDATE("sales:update"),
     SALES_DELETE("sales:delete"),
-    SALES_CREATE("sales:create");
+    SALES_CREATE("sales:create"),
+
+    TELECALLER_READ("telecaller:read"),
+    TELECALLER_UPDATE("telecaller:update"),
+    TELECALLER_DELETE("telecaller:delete"),
+    TELECALLER_CREATE("telecaller:create");
+
+
+
 
 
 

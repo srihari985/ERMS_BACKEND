@@ -79,12 +79,22 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/api/v1/sales/**").hasAnyAuthority("SALES_CREATE", "SALE_MANAGER_CREATE", "MANAGER_CREATE", "ADMIN_CREATE")
                         .requestMatchers(PUT, "/api/v1/sales/**").hasAnyAuthority("SALES_UPDATE", "SALE_MANAGER_UPDATE", "MANAGER_UPDATE", "ADMIN_UPDATE")
                         .requestMatchers(DELETE, "/api/v1/sales/**").hasAnyAuthority("SALES_DELETE", "SALE_MANAGER_DELETE", "MANAGER_DELETE", "ADMIN_DELETE")
+
+
+                        // Telecaller access control
+                        .requestMatchers("/api/v1/telecaller/**").hasAnyRole("ADMIN", "MANAGER", "SALE_MANAGER", "TELECALLER")
+                        .requestMatchers(GET, "/api/v1/telecaller/**").hasAnyAuthority("TELECALLER_READ", "SALE_MANAGER_READ", "MANAGER_READ", "ADMIN_READ")
+                        .requestMatchers(POST, "/api/v1/telecaller/**").hasAnyAuthority("TELECALLER_CREATE", "SALE_MANAGER_CREATE", "MANAGER_CREATE", "ADMIN_CREATE")
+                        .requestMatchers(PUT, "/api/v1/telecaller/**").hasAnyAuthority("TELECALLER_UPDATE", "SALE_MANAGER_UPDATE", "MANAGER_UPDATE", "ADMIN_UPDATE")
+                        .requestMatchers(DELETE, "/api/v1/telecaller/**").hasAnyAuthority("TELECALLER_DELETE", "SALE_MANAGER_DELETE", "MANAGER_DELETE", "ADMIN_DELETE")
+
+
                         // Quotation
                         .requestMatchers("api/sale/**").permitAll()
                         .requestMatchers("api/itemstable/**").permitAll()
                         .requestMatchers("api/bankdetails/**").permitAll()
                         .requestMatchers("api/form/**").permitAll()
-                        .requestMatchers("api/addparty/**").permitAll()
+                        .requestMatchers("api/addParty/**").permitAll()
                         .requestMatchers("api/addlist/**").permitAll()
                         .anyRequest()
                         .authenticated()

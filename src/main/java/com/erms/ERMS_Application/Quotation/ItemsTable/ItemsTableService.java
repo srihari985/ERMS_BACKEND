@@ -1,11 +1,12 @@
 package com.erms.ERMS_Application.Quotation.ItemsTable;
 
-import com.erms.ERMS_Application.Quotation.Form.FormEntity;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.erms.ERMS_Application.Quotation.Form.FormEntity;
 
 @Service
 public class ItemsTableService {
@@ -19,10 +20,10 @@ public class ItemsTableService {
         }
 
 	//////////////////////////get items by FormEntity ///////////////////////////
-	public List<ItemsTableEntity> findItemsByForm(FormEntity formEntity) {
-	    // Calls the repository method to fetch all items by FormEntity
-	    return itemsTableRepo.findAllByFormEntity(formEntity);
-	}
+//	public List<ItemsTableEntity> findItemsByForm(FormEntity formEntity) {
+//	    // Calls the repository method to fetch all items by FormEntity
+//	    return itemsTableRepo.findAllByFormEntity(formEntity);
+//	}
 	
 	//////////////////////Get All ItemsTable/////////////////////////////////
 	public List<ItemsTableEntity> findAllItemsTable() {

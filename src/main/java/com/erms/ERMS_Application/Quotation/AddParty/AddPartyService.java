@@ -1,36 +1,32 @@
 package com.erms.ERMS_Application.Quotation.AddParty;
 
-import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.erms.ERMS_Application.Authentication.sales.Sales;
+import com.erms.ERMS_Application.Authentication.sales.SalesRepository;
 
 @Service
 public class AddPartyService {
 	
-	@Autowired
-	private AddPartyRepository addPartyRepo;
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////AddParty Save/////////////////////////////////////////////////////////////
-	public AddPartyEntity addParty(AddPartyEntity addparty) throws MessagingException {
-		try{
-			AddPartyEntity newParty =addPartyRepo.save(addparty);
-			// Check if the save operation failed (newParty is null or not populated correctly)
-            if (newParty == null || newParty.getAdId() == 0) {
-                throw new MessagingException("Failed to load the party data after saving.");
-            }
-		return newParty;
-		}catch (DataAccessException data) {
-        // Catch any data access exceptions that occur during the save operation
-			throw new MessagingException("Failed to save party entity due to database error: " + data.getMessage(), data);
-		} catch (Exception ex) {
-        // Catch any other exceptions that may occur
-			throw new MessagingException("An unexpected error occurred while saving the party entity: " + ex.getMessage(), ex);
-		}
+	@Autowired
+	private AddPartyRepo addPartyRepo;
+	
+	@Autowired
+	private SalesRepository salesRepo;
+
+	public AddPartyEntity createParty(long salesId, AddPartyEntity addParty) {
+		// TODO Auto-generated method stub
+		
+		Sales sale=salesRepo.findById(salesId).orElse(null);
+		
+		
+		addParty.setSales(sale);
+		return addPartyRepo.save(addParty);
 	}
 	
 	public Optional<AddPartyEntity> getParty(long AdId){
@@ -68,6 +64,5 @@ public class AddPartyService {
 	public void deleteByPartyId(long AdId) {
 		addPartyRepo.deleteById(AdId);
 	}
-	
 
 }

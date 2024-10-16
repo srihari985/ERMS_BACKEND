@@ -22,18 +22,29 @@ public class OrganizationController {
 
 
     @PostMapping("/register/organization")
-    public ResponseEntity<Organization> registerOrganization(@RequestParam String name , @RequestParam String email , @RequestParam String  address, @RequestParam Role role, @RequestParam String password) {
-        Organization organization = organizationService.registerOrganization(name, email,address, role, password);
-        return ResponseEntity.ok(organization);
+//    public ResponseEntity<Organization> registerOrganization(@RequestParam String name , @RequestParam String email , @RequestParam String  address, @RequestParam Role role) {
+//        Organization organization = organizationService.registerOrganization(name, email,address, role);
+//        return ResponseEntity.ok(organization);
+//    }
+    public ResponseEntity<String> registerOrganization(
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String address,
+            @RequestParam Role role) {
+        // Call the service method to register the organization
+        organizationService.registerOrganization(name, email, address, role);
+
+        // Return a response indicating successful registration
+        return ResponseEntity.ok("Organization registered successfully. An email with the generated password has been sent.");
     }
 
     @PostMapping("/register/admin/{organizationId}")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
             @PathVariable String organizationId,
             @RequestParam String firstname,@RequestParam String lastname, @RequestParam String email,
-            @RequestParam Role role,@RequestParam String password) {
+            @RequestParam Role role) {
         try {
-            AuthenticationResponse response = authenticationService.registerAdmin(organizationId,firstname,lastname,email,role,password);
+            AuthenticationResponse response = authenticationService.registerAdmin(organizationId,firstname,lastname,email,role);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse(e.getMessage()));

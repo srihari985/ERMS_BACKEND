@@ -40,10 +40,10 @@ public class ManagementController {
     public ResponseEntity<AuthenticationResponse> registerSaleManager(
             @PathVariable String managersId,
             @RequestParam String firstname,@RequestParam String lastname, @RequestParam String email,
-            @RequestParam Role role, @RequestParam String password) {
+            @RequestParam Role role) {
         try {
             // Call the service to handle sale manager registration
-            AuthenticationResponse response = authenticationService.registerSaleManager(managersId,firstname, lastname, email, role, password);
+            AuthenticationResponse response = authenticationService.registerSaleManager(managersId,firstname, lastname, email, role);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse(e.getMessage()));

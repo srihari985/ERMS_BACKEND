@@ -7,6 +7,7 @@ import com.erms.ERMS_Application.Authentication.managers.Managers;
 import com.erms.ERMS_Application.Authentication.saleManager.SaleManager;
 import com.erms.ERMS_Application.Authentication.sales.Sales;
 import com.erms.ERMS_Application.Authentication.technician.Technician;
+import com.erms.ERMS_Application.Authentication.telecaller.Telecaller;
 import jakarta.persistence.*;
 
 @Entity
@@ -47,12 +48,17 @@ public class Token {
     @JoinColumn(name = "sales_id", nullable = true) // Made nullable for flexibility
     private Sales sales;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "telecaller_id", nullable = true) // Made nullable for flexibility
+    private Telecaller telecaller;
+
     // Default constructor
     public Token() {}
 
+
     // All-args constructor
     public Token(Integer id, String token, TokenType tokenType, boolean revoked, boolean expired,
-                 Admin admin, Managers managers, SaleManager saleManager, Technician technician, Sales sales) {
+                 Admin admin, Managers managers, SaleManager saleManager, Technician technician, Sales sales, Telecaller telecaller) {
         this.id = id;
         this.token = token;
         this.tokenType = tokenType;
@@ -63,6 +69,7 @@ public class Token {
         this.saleManager = saleManager;
         this.technician = technician;
         this.sales = sales;
+        this.telecaller = telecaller;
     }
 
     // Getters and setters
@@ -158,7 +165,10 @@ public class Token {
             this.technician = (Technician) user;
         } else if (user instanceof Sales) {
             this.sales = (Sales) user;
-        } else {
+        } else if(user instanceof  Telecaller){
+            this.telecaller = (Telecaller) user;
+        }
+        else {
             throw new IllegalArgumentException("Unsupported user type");
         }
     }

@@ -48,9 +48,9 @@ public class UserController {
     }
 
 
-    @PutMapping("/reset-password/{email}")
-    public ResponseEntity<String> resetPassword(@PathVariable String email) {
-        String responseMessage = userUtilService.resetPassword(email);
+    @PutMapping("/forgot-password/{email}")
+    public ResponseEntity<String> forgotPassword(@PathVariable String email) {
+        String responseMessage = userUtilService.forgotPassword(email);
         if (responseMessage.equals("Email not found!")) {
             return new ResponseEntity<>(responseMessage, HttpStatus.NOT_FOUND);
         }

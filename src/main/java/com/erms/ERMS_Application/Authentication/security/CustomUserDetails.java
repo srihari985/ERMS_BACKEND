@@ -7,6 +7,7 @@ import com.erms.ERMS_Application.Authentication.managers.Managers;
 import com.erms.ERMS_Application.Authentication.saleManager.SaleManager;
 import com.erms.ERMS_Application.Authentication.sales.Sales;
 import com.erms.ERMS_Application.Authentication.technician.Technician;
+import com.erms.ERMS_Application.Authentication.telecaller.Telecaller;
 import com.erms.ERMS_Application.Authentication.user.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,11 +57,19 @@ public class CustomUserDetails implements UserDetails {
         this.user = sales; // Store the user object
     }
 
+    public CustomUserDetails(Telecaller telecaller) {
+        this.email = telecaller.getEmail();
+        this.password = telecaller.getPassword();
+        this.role = telecaller.getRole();
+        this.user = telecaller; // Store the user object
+    }
+
     public CustomUserDetails(Organization organization) {
         this.email = organization.getEmail();
         this.role = organization.getRole();
         this.user = organization; // Store the user object
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

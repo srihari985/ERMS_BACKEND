@@ -37,10 +37,10 @@ public class AdminController {
     public ResponseEntity<AuthenticationResponse> registerManager(
             @PathVariable String adminId,
             @RequestParam String firstname,@RequestParam String lastname, @RequestParam String email,
-            @RequestParam Role role,@RequestParam String password) {
+            @RequestParam Role role) {
         try {
             // Call the service to handle manager registration
-            AuthenticationResponse response = authenticationService.registerManager(adminId,firstname, lastname, email, role,password);
+            AuthenticationResponse response = authenticationService.registerManager(adminId,firstname, lastname, email, role);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse(e.getMessage()));

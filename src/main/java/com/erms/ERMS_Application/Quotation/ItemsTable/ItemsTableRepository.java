@@ -1,15 +1,17 @@
 package com.erms.ERMS_Application.Quotation.ItemsTable;
 
+import java.util.List;
 
-import com.erms.ERMS_Application.Quotation.Form.FormEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.erms.ERMS_Application.Quotation.Form.FormEntity;
 
 @Repository
 public interface ItemsTableRepository extends JpaRepository <ItemsTableEntity,Long> {
 
-	 List<ItemsTableEntity> findAllByFormEntity(FormEntity formEntity);
+//	List<ItemsTableEntity> findAllByFormEntity(FormEntity formEntity);
+
+	
 
 }
